@@ -1,11 +1,17 @@
 'use client'
+import { File } from "@/utils/file.type";
 import Editor from "@monaco-editor/react";
 import { useRef, useState } from "react";
+interface CodeProps {
+  selectedFile: File
+}
+export const Code = ({ selectedFile }: CodeProps) => {
 
-export const Code = () => {
-  const [fileName, setFileName] = useState('script.js');
+  if (!selectedFile) return null
 
-  const code = 'this is dummy text'
+  const [fileName, setFileName] = useState(selectedFile.path);
+
+  const code = selectedFile.content
   let language = 'js'
   const contentRef = useRef<string>("")
 

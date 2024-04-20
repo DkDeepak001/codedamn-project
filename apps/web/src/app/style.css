@@ -74,4 +74,6 @@
       @apply bg-background text-foreground;
     }
   }
-
+.file-tree__tree-item.activated {
+  background: rgba(0, 0, 0, 0.1);
+}
