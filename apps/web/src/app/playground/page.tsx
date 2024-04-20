@@ -1,3 +1,4 @@
+import { Code } from "@/components/code-editor";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 
 export default function Playground() {
@@ -8,7 +9,7 @@ export default function Playground() {
         <ResizableHandle withHandle />
         <ResizablePanel defaultSize={50}>
           <ResizablePanelGroup direction="vertical">
-            <ResizablePanel defaultSize={75}>Code editor</ResizablePanel>
+            <ResizablePanel defaultSize={75}><Code selectedFile={null} /> </ResizablePanel>
             <ResizableHandle withHandle />
             <ResizablePanel defaultSize={25}>Terminal</ResizablePanel>
           </ResizablePanelGroup>
