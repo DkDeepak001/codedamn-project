@@ -2,6 +2,6 @@
 export default function IndexPage() {
 
   return (
-    <div>Hello</div>
+    <div className="text-3xl font-bold underline bg-black text-white">Hello</div>
   );
 }
