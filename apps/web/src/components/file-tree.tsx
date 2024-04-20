@@ -13,13 +13,15 @@ const itemRenderer = (treeNode: TreeNode) => <FileItemWithFileIcon treeNode={tre
 
 
 interface FileTreeProps {
+  selectedFile: string
   rootDir: TreeNode
   socket: Socket
+  setSelectedFile: (filePath: string) => void
 }
 
 
 
-export const FileTree = ({ rootDir, socket }: FileTreeProps) => {
+export const FileTree = ({ rootDir, socket, setSelectedFile, selectedFile }: FileTreeProps) => {
   console.log(rootDir)
   const [tree, setTree] = useState<TreeNode>(rootDir)
 
@@ -30,10 +32,13 @@ export const FileTree = ({ rootDir, socket }: FileTreeProps) => {
   }, [])
 
   const toggleExpanded: TreeProps["onItemClick"] = (treeNode) => {
+    console.log(selectedFile, treeNode)
     if (treeNode.type === 'directory' && !treeNode.children?.length) {
       fetchNestedFiles(treeNode.uri);
     }
-
+    if (treeNode.type === "file") {
+      setSelectedFile(treeNode.uri)
+    }
     setTree((tree) =>
       utils.assignTreeNode(tree, treeNode.uri, { expanded: !treeNode.expanded })!
     );
@@ -42,6 +47,7 @@ export const FileTree = ({ rootDir, socket }: FileTreeProps) => {
   const fetchNestedFiles = (uri: string) => {
     socket.emit('getNestedFiles', { uri });
   };
+
   const sorter = (treeNodes: TreeNode[]) =>
     orderBy(
       treeNodes,
@@ -54,6 +60,7 @@ export const FileTree = ({ rootDir, socket }: FileTreeProps) => {
 
   return (
     <Tree
+      activatedUri={selectedFile}
       tree={tree}
       onItemClick={toggleExpanded}
       sorter={sorter}
