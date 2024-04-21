@@ -1,20 +1,64 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
+// datasource db {
+//   provider             = "postgresql"
+//   url                  = env("DATABASE_URL")
+//   referentialIntegrity = "prisma"
+// }
+
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
-  referentialIntegrity = "prisma"
+
+  // uncomment next line if you use Prisma <5.10
+  // directUrl = env("DATABASE_URL_UNPOOLED")
 }
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
   previewFeatures = ["referentialIntegrity"]
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
+  id         String  @id @default(cuid())
+  name       String
+  email      String? @unique
+  userId     String  @unique
+  profileUrl String
+
+  createdAt DateTime @default(now())
+  updateAt  DateTime @updatedAt
+
+  Projects Projects[]
+}
+
+model PlayGrounds {
+  id String @id @default(cuid())
+
+  language     String
+  descripition String
+  iconUrl      String
+
+  createdAt DateTime @default(now())
+  updateAt  DateTime @updatedAt
+
+  Projects Projects[]
+}
+
+model Projects {
+  id String @id @default(cuid())
+
+  title        String
+  descripition String? @db.Text
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  playGroundId String
+  playGround   PlayGrounds @relation(fields: [playGroundId], references: [id])
+
+  fileUrl   String
+  createdAt DateTime @default(now())
+  updateAt  DateTime @updatedAt
 }
