@@ -66,7 +66,7 @@ export const FileTree = ({ rootDir, socket, setSelectedFile, selectedFile, setRo
 
   return (
     <Tree
-      activatedUri={selectedFile}
+      activatedUri={selectedFile.uri}
       tree={rootDir}
       onItemClick={toggleExpanded}
       sorter={sorter}

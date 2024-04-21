@@ -6,9 +6,12 @@ import useSocket from "@/hooks/useSocket";
 import { TreeNode } from "@sinm/react-file-tree";
 import { useEffect, useState } from "react";
 import _ from 'lodash';
-import { XTerminal } from "@/components/terminal";
 import { Output } from "@/components/output";
+import dynamic from "next/dynamic";
 
+const DynamicTerminalComponent = dynamic(() => import('@/components/terminal').then(m => m.XTerminal), {
+  ssr: false
+})
 
 export type FileTreeType = TreeNode & { content?: string }
 export type SelectedFileType = Omit<FileTreeType, 'children' | 'expanded'>
@@ -71,7 +74,7 @@ export default function Playground() {
             </ResizablePanel>
             <ResizableHandle withHandle />
             <ResizablePanel defaultSize={25} maxSize={42} minSize={25} className="p-2" >
-              <XTerminal socket={socket} />
+              <DynamicTerminalComponent socket={socket} />
             </ResizablePanel>
           </ResizablePanelGroup>
         </ResizablePanel>
