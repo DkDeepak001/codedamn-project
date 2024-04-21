@@ -1,45 +1,51 @@
-import { FileTreeProps as TreeProps, FileTree as Tree, TreeNode } from '@sinm/react-file-tree';
+import {
+  FileTreeProps as TreeProps, FileTree as Tree
+} from '@sinm/react-file-tree';
 
 // default style
 import '@sinm/react-file-tree/styles.css';
 import '@sinm/react-file-tree/icons.css';
-import { useEffect, useState } from 'react';
+import { Dispatch, SetStateAction, useEffect } from 'react';
 import FileItemWithFileIcon from '@sinm/react-file-tree/lib/FileItemWithFileIcon';
 import { utils } from "@sinm/react-file-tree";
 import { Socket } from 'socket.io-client';
 import orderBy from "lodash/orderBy";
+import { FileTreeType, SelectedFileType } from '@/app/playground/page';
+import { TreeNode } from '@sinm/react-file-tree';
 
-const itemRenderer = (treeNode: TreeNode) => <FileItemWithFileIcon treeNode={treeNode} />
-
+const itemRenderer = (treeNode: FileTreeType) => <FileItemWithFileIcon treeNode={treeNode} />
 
 interface FileTreeProps {
-  selectedFile: string
-  rootDir: TreeNode
+  selectedFile: SelectedFileType
+  rootDir: FileTreeType
   socket: Socket
-  setSelectedFile: (filePath: string) => void
+  setSelectedFile: (file: SelectedFileType) => void
+  setRootDir: Dispatch<SetStateAction<FileTreeType | undefined>>
 }
 
-
-
-export const FileTree = ({ rootDir, socket, setSelectedFile, selectedFile }: FileTreeProps) => {
-  console.log(rootDir)
-  const [tree, setTree] = useState<TreeNode>(rootDir)
+export const FileTree = ({ rootDir, socket, setSelectedFile, selectedFile, setRootDir }: FileTreeProps) => {
 
   useEffect(() => {
-    socket.on('nestedFiles', ({ uri, nestedFiles }: { uri: string, nestedFiles: TreeNode }) => {
-      utils.appendTreeNode(tree, uri, nestedFiles)
+    socket.on('nestedFiles', ({ uri, nestedFiles }: { uri: string, nestedFiles: FileTreeType }) => {
+      utils.appendTreeNode(rootDir, uri, nestedFiles)
     })
   }, [])
 
-  const toggleExpanded: TreeProps["onItemClick"] = (treeNode) => {
+  const toggleExpanded: TreeProps["onItemClick"] = (treeNode: TreeNode) => {
     console.log(selectedFile, treeNode)
     if (treeNode.type === 'directory' && !treeNode.children?.length) {
       fetchNestedFiles(treeNode.uri);
     }
     if (treeNode.type === "file") {
-      setSelectedFile(treeNode.uri)
+      socket.emit("loadFile", { uri: treeNode.uri }, (data: string) => {
+        setSelectedFile({ type: treeNode.type, uri: treeNode.uri, content: data })
+        setRootDir((tree: FileTreeType | undefined) =>
+          utils.assignTreeNode(tree, treeNode.uri, { content: data } as Partial<FileTreeType>)!
+        );
+      })
+
     }
-    setTree((tree) =>
+    setRootDir((tree: FileTreeType | undefined) =>
       utils.assignTreeNode(tree, treeNode.uri, { expanded: !treeNode.expanded })!
     );
   };
@@ -48,7 +54,7 @@ export const FileTree = ({ rootDir, socket, setSelectedFile, selectedFile }: Fil
     socket.emit('getNestedFiles', { uri });
   };
 
-  const sorter = (treeNodes: TreeNode[]) =>
+  const sorter = (treeNodes: FileTreeType[]) =>
     orderBy(
       treeNodes,
       [
@@ -61,7 +67,7 @@ export const FileTree = ({ rootDir, socket, setSelectedFile, selectedFile }: Fil
   return (
     <Tree
       activatedUri={selectedFile}
-      tree={tree}
+      tree={rootDir}
       onItemClick={toggleExpanded}
       sorter={sorter}
       itemRenderer={itemRenderer}

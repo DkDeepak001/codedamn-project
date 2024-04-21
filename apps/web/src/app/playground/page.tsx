@@ -5,31 +5,42 @@ import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/componen
 import useSocket from "@/hooks/useSocket";
 import { TreeNode } from "@sinm/react-file-tree";
 import { useEffect, useState } from "react";
-import _ from 'lodash';
+import _, { find, flip } from 'lodash';
+
+
+export type FileTreeType = TreeNode & { content?: string }
+export type SelectedFileType = Omit<FileTreeType, 'children' | 'expanded'>
 
 export default function Playground() {
 
   const socket = useSocket()
-  const [selectedFile, setSelectedFile] = useState<string>()
-  const [serverFiles, setServerFiles] = useState<TreeNode>()
-  const [recentFiles, setRecentFiles] = useState<string[]>([])
+  const [selectedFile, setSelectedFile] = useState<SelectedFileType>()
+  const [serverFiles, setServerFiles] = useState<FileTreeType>()
+  const [recentFiles, setRecentFiles] = useState<SelectedFileType[]>([])
+
   useEffect(() => {
     if (!socket) return
-    socket.on('getInitialFiles', ({ rootDir }: { rootDir: TreeNode }) => {
+    socket.on('getInitialFiles', ({ rootDir }: { rootDir: FileTreeType }) => {
       setServerFiles({
         ...rootDir,
         expanded: true
       })
     });
+  }, [socket])
 
-  })
-  const handleFileSelect = (filePath: string) => {
-    setSelectedFile(filePath)
-    setRecentFiles((prev) => _.uniq([...prev, filePath]))
+  const handleFileSelect = (file: SelectedFileType) => {
+    setSelectedFile(file);
+    setRecentFiles((prev) => _.uniqBy([...prev, file], 'uri'));
   }
 
-  const handleRemoveFromRecent = (filePath: string) => {
-    setRecentFiles((prev) => _.without(prev, filePath));
+  const handleRemoveFromRecent = (file: SelectedFileType) => {
+    setRecentFiles((prev) => _.reject(prev, { uri: file.uri }));
+    setSelectedFile((prev) => {
+      if (prev?.uri !== file.uri) return prev
+      const last = recentFiles.indexOf(file)
+      const prevFile = last === 0 ? recentFiles[last + 1] : recentFiles[last - 1]
+      return prevFile
+    });
   }
 
   if (!serverFiles) return
@@ -41,8 +52,9 @@ export default function Playground() {
           <FileTree
             selectedFile={selectedFile!}
             rootDir={serverFiles}
+            setRootDir={setServerFiles}
             socket={socket}
-            setSelectedFile={(filePath: string) => handleFileSelect(filePath)} />
+            setSelectedFile={(file: SelectedFileType) => handleFileSelect(file)} />
         </ResizablePanel>
         <ResizableHandle withHandle />
         <ResizablePanel defaultSize={50}>
@@ -51,8 +63,8 @@ export default function Playground() {
               <Code
                 selectedFile={selectedFile!}
                 recentFiles={recentFiles}
-                setSelectedFile={(filePath: string) => setSelectedFile(filePath)}
-                removeFromRecent={(filePath: string) => handleRemoveFromRecent(filePath)}
+                setSelectedFile={(file: SelectedFileType) => setSelectedFile(file)}
+                removeFromRecent={(file: SelectedFileType) => handleRemoveFromRecent(file)}
               />
             </ResizablePanel>
             <ResizableHandle withHandle />
