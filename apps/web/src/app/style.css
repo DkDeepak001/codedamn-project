@@ -66,6 +66,7 @@
     }
   }
 
+
   @layer base {
     * {
       @apply border-border;
@@ -77,8 +78,6 @@
 .file-tree__tree-item.activated {
   background: rgba(0, 0, 0, 0.1);
 }
-
-
 
 /**
  *  Default styles for xterm.js

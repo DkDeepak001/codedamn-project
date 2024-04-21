@@ -7,6 +7,7 @@ import { TreeNode } from "@sinm/react-file-tree";
 import { useEffect, useState } from "react";
 import _ from 'lodash';
 import { XTerminal } from "@/components/terminal";
+import { Output } from "@/components/output";
 
 
 export type FileTreeType = TreeNode & { content?: string }
@@ -75,7 +76,9 @@ export default function Playground() {
           </ResizablePanelGroup>
         </ResizablePanel>
         <ResizableHandle withHandle />
-        <ResizablePanel defaultSize={35}>output</ResizablePanel>
+        <ResizablePanel defaultSize={35}>
+          <Output url="http://localhost:3002" />
+        </ResizablePanel>
       </ResizablePanelGroup>
     </div>
   )

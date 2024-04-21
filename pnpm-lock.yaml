@@ -128,6 +128,9 @@ importers:
       react-dom:
         specifier: ^18.2.0
         version: 18.2.0(react@18.2.0)
+      react-iframe:
+        specifier: ^1.8.5
+        version: 1.8.5(react@18.2.0)
       react-resizable-panels:
         specifier: ^2.0.18
         version: 2.0.18(react-dom@18.2.0)(react@18.2.0)
@@ -140,9 +143,6 @@ importers:
       tailwindcss-animate:
         specifier: ^1.0.7
         version: 1.0.7(tailwindcss@3.4.3)
-      xterm-theme:
-        specifier: ^1.1.0
-        version: 1.1.0
     devDependencies:
       '@repo/database':
         specifier: workspace:*
@@ -5258,6 +5258,15 @@ packages:
       scheduler: 0.23.0
     dev: false
 
+  /react-iframe@1.8.5(react@18.2.0):
+    resolution: {integrity: sha512-F4cQJGs3ydaG6fJWfuz9yLwOU0Trzl6kttXuUG+vYwosH8enOOFxZWEDQCSbNVO8ayjfYZeqLxEvdvcsSy4GvA==}
+    peerDependencies:
+      react: '>=16.x.x'
+    dependencies:
+      object-assign: 4.1.1
+      react: 18.2.0
+    dev: false
+
   /react-is@16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
 
@@ -6413,10 +6422,6 @@ packages:
   /xmlhttprequest-ssl@2.0.0:
     resolution: {integrity: sha512-QKxVRxiRACQcVuQEYFsI1hhkrMlrXHPegbbd1yn9UHOmRxY+si12nQYzri3vbzt8VdTTRviqcKxcyllFas5z2A==}
     engines: {node: '>=0.4.0'}
-    dev: false
-
-  /xterm-theme@1.1.0:
-    resolution: {integrity: sha512-n2GocBEbqcz4vEl4OYkU93hEVia8GWdnqchiz/0nQ/olRUyhulGf4wfha23x/D2m0imWaIavRZtt8c6kWZXdsA==}
     dev: false
 
   /yallist@3.1.1:
