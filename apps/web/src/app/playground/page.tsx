@@ -5,7 +5,8 @@ import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/componen
 import useSocket from "@/hooks/useSocket";
 import { TreeNode } from "@sinm/react-file-tree";
 import { useEffect, useState } from "react";
-import _, { find, flip } from 'lodash';
+import _ from 'lodash';
+import { XTerminal } from "@/components/terminal";
 
 
 export type FileTreeType = TreeNode & { content?: string }
@@ -48,7 +49,7 @@ export default function Playground() {
   return (
     <div className="h-screen w-screen">
       <ResizablePanelGroup direction="horizontal">
-        <ResizablePanel defaultSize={15} className="p-3">
+        <ResizablePanel defaultSize={15} className="p-3" minSize={5} maxSize={20}>
           <FileTree
             selectedFile={selectedFile!}
             rootDir={serverFiles}
@@ -68,7 +69,9 @@ export default function Playground() {
               />
             </ResizablePanel>
             <ResizableHandle withHandle />
-            <ResizablePanel defaultSize={25}>Terminal</ResizablePanel>
+            <ResizablePanel defaultSize={25} maxSize={42} minSize={25} className="p-2" >
+              <XTerminal socket={socket} />
+            </ResizablePanel>
           </ResizablePanelGroup>
         </ResizablePanel>
         <ResizableHandle withHandle />

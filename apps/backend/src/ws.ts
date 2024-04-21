@@ -3,7 +3,12 @@ import { Server as HttpServer } from "http";
 import * as fs from 'fs'
 //@ts-ignore 
 import { getTreeNode } from "@sinm/react-file-tree/lib/node";
+import { TerminalManager } from "./utils/pty";
 
+
+const terminalManager = new TerminalManager()
+
+export const HOME = '/home/dk_deepak_001/dev/packages/workspace/react/'
 export function initWs(httpServer: HttpServer) {
 
   const io = new Server(httpServer, {
@@ -15,7 +20,7 @@ export function initWs(httpServer: HttpServer) {
 
   io.on("connection", async (socket) => {
     socket.emit("getInitialFiles", {
-      rootDir: await getTreeNode("/home/dk_deepak_001/dev/packages/workspace/react/")
+      rootDir: await getTreeNode(HOME)
     })
 
     socket.on('getNestedFiles', async ({ uri }: { uri: string }) => {
@@ -34,7 +39,30 @@ export function initWs(httpServer: HttpServer) {
       })
     })
 
+    socket.on("requestTerminal", async (userId) => {
+      try {
+        terminalManager.createPty(socket.id, userId, (data, pid) => {
+          socket.emit("terminal", {
+            pid,
+            data: Buffer.from(data, 'utf8')
+          });
+        })
+      } catch (error) {
+        console.log(error)
+      }
+
+    })
+
+    socket.on("terminalData", async (tId, data: string) => {
+      try {
+        terminalManager.write(tId, data)
+      } catch (error) {
+        console.log(error)
+      }
+    })
   });
+
+
 }
 
 
