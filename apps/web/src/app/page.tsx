@@ -1,10 +1,13 @@
 'use client'
 
+import { Header } from "@/components/header";
 import { ModeToggle } from "@/components/theme";
 
 export default function IndexPage() {
 
   return (
-    <div className="text-3xl font-bold underline ">Hello <ModeToggle /></div>
+    <div className=" ">
+      <Header />
+    </div>
   );
 }

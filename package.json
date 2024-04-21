@@ -9,10 +9,11 @@
     "db:migrate:deploy": "turbo run db:migrate:deploy",
     "db:push": "turbo run db:push",
     "db:seed": "turbo run db:seed",
-    "dev": "turbo run dev",
+    "dev": "pnpm with-env turbo run dev",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "generate": "turbo run generate",
-    "lint": "turbo run lint"
+    "lint": "turbo run lint",
+    "with-env":"dotenv -e .env"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
@@ -23,5 +24,8 @@
   "engines": {
     "node": ">=18"
   },
-  "packageManager": "pnpm@9.0.4"
+  "packageManager": "pnpm@9.0.4",
+  "dependencies": {
+    "dotenv-cli": "^7.3.0"
+  }
 }
