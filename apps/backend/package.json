@@ -14,10 +14,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@sinm/react-file-tree": "^1.1.1",
     "aws-sdk": "^2.1556.0",
     "dotenv": "^16.4.3",
     "express": "^4.18.3",
-    "node": "link:@sinm/react-file-tree/lib/node",
     "node-pty": "^1.0.0",
     "socket.io": "^4.7.5"
   },

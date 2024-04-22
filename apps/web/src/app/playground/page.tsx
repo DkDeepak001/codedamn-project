@@ -19,6 +19,7 @@ export type SelectedFileType = Omit<FileTreeType, 'children' | 'expanded'>
 export default function Playground() {
 
   const socket = useSocket()
+  console.log(socket)
   const [selectedFile, setSelectedFile] = useState<SelectedFileType>()
   const [serverFiles, setServerFiles] = useState<FileTreeType>()
   const [recentFiles, setRecentFiles] = useState<SelectedFileType[]>([])
@@ -80,7 +81,7 @@ export default function Playground() {
         </ResizablePanel>
         <ResizableHandle withHandle />
         <ResizablePanel defaultSize={35}>
-          <Output url="http://localhost:3002" />
+          <Output url="http://localhost:4000" />
         </ResizablePanel>
       </ResizablePanelGroup>
     </div>

@@ -1,14 +1,13 @@
 import { Server } from "socket.io";
 import { Server as HttpServer } from "http";
 import * as fs from 'fs'
-//@ts-ignore 
 import { getTreeNode } from "@sinm/react-file-tree/lib/node";
 import { TerminalManager } from "./utils/pty";
 
 
 const terminalManager = new TerminalManager()
 
-export const HOME = '/home/dk_deepak_001/dev/packages/workspace/react/'
+export const HOME = '/workspace'
 export function initWs(httpServer: HttpServer) {
 
   const io = new Server(httpServer, {
