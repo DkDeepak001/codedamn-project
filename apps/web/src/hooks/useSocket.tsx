@@ -8,7 +8,7 @@ const useSocket = (): Socket => {
 
   useEffect(() => {
     // const newSocket = io('ws://node-ca559dce-5f4b-420c-909b-a711d96b336c.runner.dkdeepak001.com')
-    const newSocket = io(`http://34.93.11.160:30008`)
+    const newSocket = io(`https://api.codedamn.dkdeepak001.com`)
 
     setSocket(newSocket);
     return () => {
