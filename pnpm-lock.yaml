@@ -120,6 +120,9 @@ importers:
       '@xterm/xterm':
         specifier: ^5.5.0
         version: 5.5.0
+      aws-sdk:
+        specifier: ^2.1556.0
+        version: 2.1556.0
       class-variance-authority:
         specifier: ^0.7.0
         version: 0.7.0

@@ -7,12 +7,13 @@ const useSocket = (): Socket => {
 
 
   useEffect(() => {
-    const newSocket = io('http://localhost:3001')
-    // const newSocket = io(`https://user2.terminal.dkdeepak001.com`, {
-    // extraHeaders: {
-    // 'Access-Control-Allow-Origin': '*'
-    // }
-    // })
+    // const newSocket = io('http://localhost:3001')
+    const newSocket = io(`http://34.16.169.164:30040`, {
+      extraHeaders: {
+        'Access-Control-Allow-Origin': '*'
+      },
+      rejectUnauthorized: false
+    })
 
     setSocket(newSocket);
     return () => {

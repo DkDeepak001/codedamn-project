@@ -10,14 +10,10 @@
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-
-  // uncomment next line if you use Prisma <5.10
-  // directUrl = env("DATABASE_URL_UNPOOLED")
 }
 
 generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["referentialIntegrity"]
+  provider = "prisma-client-js"
 }
 
 model User {
@@ -39,6 +35,7 @@ model PlayGrounds {
   language     String
   descripition String
   iconUrl      String
+  baseCodeUri  String?
 
   createdAt DateTime @default(now())
   updateAt  DateTime @updatedAt
@@ -49,11 +46,10 @@ model PlayGrounds {
 model Projects {
   id String @id @default(cuid())
 
-  title        String
-  descripition String? @db.Text
+  title String
 
   userId String
-  user   User   @relation(fields: [userId], references: [id])
+  user   User   @relation(fields: [userId], references: [userId])
 
   playGroundId String
   playGround   PlayGrounds @relation(fields: [playGroundId], references: [id])
@@ -61,4 +57,7 @@ model Projects {
   fileUrl   String
   createdAt DateTime @default(now())
   updateAt  DateTime @updatedAt
+
+  @@index([userId])
+  @@index([playGroundId])
 }

@@ -12,6 +12,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { useCreatePlayGround } from '@/store/modal';
 import { useState } from 'react';
 import { useAuth } from '@clerk/nextjs';
+import { round } from 'lodash';
 
 
 export const SetupPlayGround = () => {
@@ -25,30 +26,29 @@ export const SetupPlayGround = () => {
 
   const [projectName, setProjectName] = useState("")
   const { toast } = useToast()
-  const { isSignedIn } = useAuth()
+  const { isSignedIn, userId } = useAuth()
 
   const router = useRouter()
 
-  const handleCreate = () => {
-    if (!isSignedIn) return toast({
-      title: "Please Sigin",
-      description: "Please create a account to Continue",
-      variant: "destructive"
+  const handleCreate = async () => {
+    if (!isSignedIn) return toast({ title: "Please Sigin", description: "Please create a account to Continue", variant: "destructive" })
+    if (projectName.trim().length === 0) return toast({ title: "Title Required", description: "Please Enter a Project Name to Continue", variant: "destructive" })
+    if (projectName.trim().includes(" ")) return toast({ title: "Invalid Project Name", description: "Give project name like, my-awesome-project", variant: 'destructive' });
 
-    })
-    if (projectName.trim().length === 0) {
-      return toast({
-        title: "Title Required",
-        description: "Please Enter a Project Name to Continue",
-        variant: "destructive"
+    try {
+      const res = await fetch('/playground/api', {
+        method: "POST",
+        body: JSON.stringify({
+          userId,
+          language,
+          projectName
+        })
       })
-    }
-    if (projectName.trim().includes(" ")) {
-      toast({
-        title: "Invalid Project Name",
-        description: "Give project name like, my-awesome-project",
-        variant: 'destructive'
-      });
+      // if (res.status === 200) router.push("/playground")
+    } catch (error) {
+      console.log(error)
+    } finally {
+      setProjectName("")
     }
   }
 
