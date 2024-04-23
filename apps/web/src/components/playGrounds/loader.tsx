@@ -4,7 +4,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 
 export const PlayGoundLoader = () => {
   return (
-    <div className="flex flex-wrap justify-start items-center gap-3 w-10/12  mx-auto my-10 ">
+    <div className="flex flex-wrap justify-start items-center gap-5">
       {new Array(4).fill(0).map((_, index) => (
         <Card className="flex flex-row items-center justify-start  px-8 cursor-pointer py-1" key={index} >
           <Skeleton className="h-11 w-12 " />
