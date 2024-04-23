@@ -7,8 +7,23 @@ import { TerminalManager } from "./utils/pty";
 
 const terminalManager = new TerminalManager()
 
-export const HOME = '/workspace'
+// export const HOME = '/workspace'
+export const HOME = '/home/dk_deepak_001/dev/packages/workspace/react/'
 export function initWs(httpServer: HttpServer) {
+
+  let timer: Date | null = new Date()
+  console.log(timer)
+  const checkDisconnectStatus = (callback: () => void) => {
+    console.log("Checking for disconnecting ")
+    if (timer) {
+      console.log("User disconnected")
+      const currentTime = new Date();
+      const timeDifference = currentTime.getTime() - timer.getTime();
+      if (timeDifference > 3 * 60 * 1000) {
+        callback();
+      }
+    }
+  };
 
   const io = new Server(httpServer, {
     cors: {
@@ -17,10 +32,35 @@ export function initWs(httpServer: HttpServer) {
     }
   });
 
+
   io.on("connection", async (socket) => {
+    timer = null
+    socket.on("disconnect", async () => {
+      try {
+        timer = new Date()
+        console.log("user disconnected");
+      } catch (error) {
+        console.log(error)
+      }
+    });
+    // Check for user disconnected
+    setInterval(() => {
+      checkDisconnectStatus(async () => {
+        try {
+          console.log("User disconnected for more than 30 minutes");
+          // await fetch(`${process.env.ORCHESTRATOR_URL}/stop?nodeId=${language}-${userId}`)
+        } catch (error) {
+          console.log(error)
+        }
+      });
+    }, 60 * 1000);
+
+
     socket.emit("getInitialFiles", {
       rootDir: await getTreeNode(HOME)
     })
+
+
 
     socket.on('getNestedFiles', async ({ uri }: { uri: string }) => {
       const nestedFiles = await getTreeNode(uri)

@@ -4,7 +4,10 @@ import { initWs } from "./ws";
 import cors from "cors";
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: ['http://localhost:3000', 'https://codedamn-project-web.vercel.app'],
+  methods: ["POST", "GET", "PUT"]
+}));
 const httpServer = createServer(app);
 
 initWs(httpServer);
