@@ -43,49 +43,18 @@ app.post('/script', (req, res) => {
 
           console.log(ports1, ports2);
 
+          return res.status(200).json({
+            message: `Container deployed successfully for user: ${userId}`,
+            terminalIp: `http://34.16.169.164:${ports1}`,
+            oninput: `http://34.16.169.164:${ports2}`
+          })
+
           // Read current Caddyfile
-          fs.readFile('/etc/caddy/Caddyfile', 'utf8', (err, data) => {
-            if (err) {
-              console.error(`Error reading Caddyfile: ${err}`);
-              return res.status(500).send('Error reading Caddyfile');
-            }
-
-            // Check if domains already exist
-            const domain1 = `${userId}.terminal.dkdeepak001.com`;
-            const domain2 = `${userId}.output.dkdeepak001.com`;
-
-            if (data.includes(domain1)) {
-              // Update port for domain1
-              data = data.replace(new RegExp(`${domain1}\\s*{[^}]*reverse_proxy\\s+[^:]+:\\d+}`), `${domain1} {\n\treverse_proxy 10.182.0.3:${ports1}\n}`);
-            } else {
-              // Add new configuration for domain1
-              data += `\n${domain1} {\n\treverse_proxy 10.182.0.3:${ports1}\n}`;
-            }
-
-            if (data.includes(domain2)) {
-              // Update port for domain2
-              data = data.replace(new RegExp(`${domain2}\\s*{[^}]*reverse_proxy\\s+[^:]+:\\d+}`), `${domain2} {\n\treverse_proxy 10.182.0.3:${ports2}\n}`);
-            } else {
-              // Add new configuration for domain2
-              data += `\n${domain2} {\n\treverse_proxy 10.182.0.3:${ports2}\n}`;
-            }
-
-            // Write updated Caddyfile
-            fs.writeFile('/etc/caddy/Caddyfile', data, 'utf8', (err) => {
-              if (err) {
-                console.error(`Error updating Caddyfile: ${err}`);
-                return res.status(500).send('Error updating Caddyfile');
-              }
-              console.log(`Caddyfile updated successfully for user: ${userId}`);
-              res.send(`User ${userId} created successfully`);
-            });
-          });
         }
-
 
         if (stderr) res.status(500).json({ message: stderr.toString() })
 
-      });
+      })
     }
   });
 

@@ -12,7 +12,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { useCreatePlayGround } from '@/store/modal';
 import { useState } from 'react';
 import { useAuth } from '@clerk/nextjs';
-import { round } from 'lodash';
+import { redirect } from 'next/navigation'
 
 
 export const SetupPlayGround = () => {
@@ -36,7 +36,7 @@ export const SetupPlayGround = () => {
     if (projectName.trim().includes(" ")) return toast({ title: "Invalid Project Name", description: "Give project name like, my-awesome-project", variant: 'destructive' });
 
     try {
-      const res = await fetch('/playground/api', {
+      const res = await fetch('/api/playground', {
         method: "POST",
         body: JSON.stringify({
           userId,
@@ -44,11 +44,12 @@ export const SetupPlayGround = () => {
           projectName
         })
       })
-      // if (res.status === 200) router.push("/playground")
+      const data = await res.json()
+      router.push(`playground?projectId=${data.project.id}`)
+      setOpen(false)
+      setProjectName('')
     } catch (error) {
       console.log(error)
-    } finally {
-      setProjectName("")
     }
   }
 
@@ -72,7 +73,7 @@ export const SetupPlayGround = () => {
               />
             </div>
           </div>
-          <Button variant='secondary' onClick={handleCreate}  >
+          <Button variant='secondary' onClick={handleCreate}>
             Create a PlayGround
           </Button>
 

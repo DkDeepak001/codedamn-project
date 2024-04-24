@@ -2,13 +2,17 @@ import { useEffect, useState } from "react";
 import { Socket, io, } from "socket.io-client";
 
 
-const useSocket = (): Socket => {
+type SocketProps = {
+  wsUrl: string
+}
+const useSocket = ({ wsUrl }: SocketProps): Socket => {
   const [socket, setSocket] = useState<Socket | null>(null);
 
 
   useEffect(() => {
+    if (!wsUrl) return
     // const newSocket = io('http://localhost:3001')
-    const newSocket = io(`http://34.16.169.164:30040`, {
+    const newSocket = io(wsUrl, {
       extraHeaders: {
         'Access-Control-Allow-Origin': '*'
       },
@@ -19,7 +23,7 @@ const useSocket = (): Socket => {
     return () => {
       newSocket.disconnect();
     };
-  }, []);
+  }, [wsUrl]);
 
   return socket as Socket;
 }

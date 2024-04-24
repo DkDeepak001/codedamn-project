@@ -54,6 +54,9 @@ model Projects {
   playGroundId String
   playGround   PlayGrounds @relation(fields: [playGroundId], references: [id])
 
+  terminalUrl String?
+  outputUrl   String?
+
   fileUrl   String
   createdAt DateTime @default(now())
   updateAt  DateTime @updatedAt

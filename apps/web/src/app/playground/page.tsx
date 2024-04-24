@@ -8,6 +8,8 @@ import { useEffect, useState } from "react";
 import _ from 'lodash';
 import { Output } from "@/components/output";
 import dynamic from "next/dynamic";
+import { useSearchParams } from "next/navigation";
+import { Projects } from "@repo/database";
 
 const DynamicTerminalComponent = dynamic(() => import('@/components/terminal').then(m => m.XTerminal), {
   ssr: false
@@ -17,8 +19,22 @@ export type FileTreeType = TreeNode & { content?: string }
 export type SelectedFileType = Omit<FileTreeType, 'children' | 'expanded'>
 
 export default function Playground() {
+  const projectId = useSearchParams().get('projectId')
+  console.log(projectId)
+  const [project, setProject] = useState<Projects>()
 
-  const socket = useSocket()
+  useEffect(() => {
+    if (!projectId) return
+
+    const fetchUrl = async () => {
+      const res = await fetch(`api/projects?projectId=${projectId}`, { method: "GET" })
+      const data = await res.json() as { projects: Projects }
+      setProject(data.projects)
+    }
+    fetchUrl()
+  }, [projectId])
+
+  const socket = useSocket({ wsUrl: project?.terminalUrl! })
   console.log(socket)
   const [selectedFile, setSelectedFile] = useState<SelectedFileType>()
   const [serverFiles, setServerFiles] = useState<FileTreeType>()
@@ -81,7 +97,7 @@ export default function Playground() {
         </ResizablePanel>
         <ResizableHandle withHandle />
         <ResizablePanel defaultSize={35}>
-          <Output url="http://localhost:4000" />
+          <Output url={project?.outputUrl!} />
         </ResizablePanel>
       </ResizablePanelGroup>
     </div>
