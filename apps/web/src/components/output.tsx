@@ -22,7 +22,6 @@ export const Output = ({ url }: OutputProps) => {
         <RefreshCcw size={16} onClick={refreshIframe} className='cursor-pointer' />
         <div className='w-3/4 h-3/4 rounded-sm text-sm text-foreground/50'>
           <input
-            disabled
             className='w-full h-full  px-2 py-1 rounded-sm '
             value={localUrl}
             onChange={(e) => setLoacalurl(e.target.value)}

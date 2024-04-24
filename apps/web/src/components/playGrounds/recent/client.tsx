@@ -4,7 +4,7 @@ import { ProjectReturnType } from "./server"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { ClipLoader } from "react-spinners"
+import { BounceLoader, ClipLoader } from "react-spinners"
 type RecentPlayGroundProps = ProjectReturnType
 
 
@@ -50,7 +50,19 @@ export const RecentPlayGround = (p: RecentPlayGroundProps) => {
           <CardDescription>{p.playGround.language}</CardDescription>
         </CardHeader>
       </div>
-      <div className="flex flex-row gap-x-5">
+      <div className="flex flex-row gap-x-10">
+        {p.isRunning &&
+          <div className="flex flex-row items-center gap-x-2">
+            <BounceLoader
+              color="#5de673"
+              cssOverride={{}}
+              loading
+              size={20}
+              speedMultiplier={0.5}
+            />
+            <h2 className="font-bold text-green-500 text-base">Running</h2>
+          </div>
+        }
         <Button variant={'default'} disabled={loading} className="w-24">
           {loading ? <ClipLoader color="#000" size={12} />
             : 'open'}

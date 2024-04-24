@@ -27,7 +27,8 @@ export async function POST(req: Request) {
       },
       data: {
         terminalUrl: res.terminalUrl,
-        outputUrl: res.outputUrl
+        outputUrl: res.outputUrl,
+        isRunning: true
       }
     })
   } else {
@@ -45,14 +46,31 @@ export async function POST(req: Request) {
         title: projectName,
         userId: userId,
         playGroundId: language.id,
+        isRunning: true,
         fileUrl: `${fileLocation}`,
         terminalUrl: res.terminalUrl,
         outputUrl: res.outputUrl
       }
     })
   }
-
   return Response.json({ message: "Project Created", project })
+}
+
+
+
+export async function DELETE(req: Request) {
+  const projectId = req.url.split("projectId=")[1]
+  await prisma.projects.update({
+    where: {
+      id: projectId
+    },
+    data: {
+      terminalUrl: null,
+      outputUrl: null,
+      isRunning: false
+    }
+  })
+  return Response.json({ message: "Project Stoped" })
 }
 
 

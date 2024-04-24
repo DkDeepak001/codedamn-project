@@ -36,7 +36,11 @@ export default function Playground() {
     fetchUrl()
   }, [projectId])
 
-  const socket = useSocket({ wsUrl: project?.terminalUrl!, containerId: `${userId}-${project?.title}` })
+  const socket = useSocket({
+    wsUrl: project?.terminalUrl!,
+    containerId: `${userId}-${project?.title}`,
+    projectId: project?.id!
+  })
   console.log(socket)
   const [selectedFile, setSelectedFile] = useState<SelectedFileType>()
   const [serverFiles, setServerFiles] = useState<FileTreeType>()
