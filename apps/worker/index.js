@@ -45,13 +45,10 @@ app.post('/script', (req, res) => {
 
           return res.status(200).json({
             message: `Container deployed successfully for user: ${userId}`,
-            terminalIp: `http://34.16.169.164:${ports1}`,
-            oninput: `http://34.16.169.164:${ports2}`
+            terminalUrl: `http://34.16.169.164:${ports1}`,
+            outputUrl: `http://34.16.169.164:${ports2}`
           })
-
-          // Read current Caddyfile
         }
-
         if (stderr) res.status(500).json({ message: stderr.toString() })
 
       })
@@ -73,5 +70,6 @@ app.get('/health', (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+
 
 
