@@ -18,7 +18,7 @@ export function initWs(httpServer: HttpServer) {
       console.log("User disconnected")
       const currentTime = new Date();
       const timeDifference = currentTime.getTime() - timer.getTime();
-      if (timeDifference > 3 * 60 * 1000) {
+      if (timeDifference > 20 * 60 * 1000) {
         callback();
       }
     }
@@ -59,12 +59,12 @@ export function initWs(httpServer: HttpServer) {
       checkDisconnectStatus(async () => {
         try {
           console.log("User disconnected for more than 30 minutes");
-          await fetch(`http://34.125.240.204:4000/stop?containerId=${containerId}&projectId=${projectId}`)
+          // await fetch(`http://34.125.240.204:4000/stop?containerId=${containerId}&projectId=${projectId}`)
         } catch (error) {
           console.log(error)
         }
       });
-    }, 60 * 1000);
+    }, 4 * 60 * 1000);
 
 
     socket.emit("getInitialFiles", {

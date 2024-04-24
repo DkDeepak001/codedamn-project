@@ -12,6 +12,14 @@ if [ -z "$S3_URL" ]; then
 	echo "S3_URL environment variable is not set. Files from S3 will not be downloaded."
 else
 	download_from_s3
+
+	# Install npm dependencies
+	echo "Installing npm dependencies..."
+	npm install
+
+	# Run development server
+	echo "Running development server..."
+	npm run dev
 fi
 
 # Start the main application
