@@ -63,9 +63,11 @@ app.get('/stop', (req, res) => {
     const arg1 = containerId;
     const command = `./stop.sh ${arg1}`;
 
-    exec(command, (error, stdOut, stderr) => {
+    exec(command, async (error, stdOut, stderr) => {
       if (stdout) {
-        console.log('change status to stop', stdout, projectId)
+        await fetch(`http://34.125.240.204:3000/api/playground?projectId=${projectId}`, {
+          method: "DELETE"
+        })
       }
     })
     res.status(200).json({ meassage: "message" })
