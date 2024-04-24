@@ -1,6 +1,7 @@
 const express = require('express');
 const { exec } = require('child_process');
 const fs = require('fs');
+const { stdout } = require('process');
 
 
 const app = express();
@@ -55,6 +56,22 @@ app.post('/script', (req, res) => {
     }
   });
 
+});
+app.get('/stop', (req, res) => {
+  try {
+    const { containerId, projectId } = req.query
+    const arg1 = containerId;
+    const command = `./stop.sh ${arg1}`;
+
+    exec(command, (error, stdOut, stderr) => {
+      if (stdout) {
+        console.log('change status to stop', stdout, projectId)
+      }
+    })
+    res.status(200).json({ meassage: "message" })
+  } catch (e) {
+    console.log(e)
+  }
 });
 
 app.get('/health', (req, res) => {

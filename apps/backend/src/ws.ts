@@ -41,7 +41,9 @@ export function initWs(httpServer: HttpServer) {
       return val.split('=')
     }))
     const containerId = socketUrl[0][1]
-    console.log(containerId)
+    const projectId = socketUrl[1][1]
+
+    console.log(containerId, projectId)
 
     timer = null
     socket.on("disconnect", async () => {
@@ -57,7 +59,7 @@ export function initWs(httpServer: HttpServer) {
       checkDisconnectStatus(async () => {
         try {
           console.log("User disconnected for more than 30 minutes");
-          await fetch(`http://34.16.169.164:4000/stop?containerId=${containerId}`)
+          await fetch(`http://34.125.240.204:4000/stop?containerId=${containerId}&projectId=${projectId}`)
         } catch (error) {
           console.log(error)
         }
