@@ -49,10 +49,9 @@ export const SetupPlayGround = () => {
       router.push(`playground?projectId=${data.project.id}`)
       setOpen(false)
       setProjectName('')
+      setLoading(false)
     } catch (error) {
       console.log(error)
-    } finally {
-      setLoading(false)
     }
   }
 
@@ -77,7 +76,7 @@ export const SetupPlayGround = () => {
             </div>
           </div>
           <Button variant='secondary' onClick={handleCreate} disabled={loading}>
-            {loading ? <ClipLoader color="#36d7b7" />
+            {loading ? <ClipLoader color="#fff" />
               : 'Create a PlayGround'}
           </Button>
         </DialogHeader>
