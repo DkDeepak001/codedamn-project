@@ -7,12 +7,11 @@ import { TerminalManager } from "./utils/pty";
 
 const terminalManager = new TerminalManager()
 
-// export const HOME = '/workspace'
-export const HOME = '/home/dk_deepak_001/dev/packages/workspace/react/'
+export const HOME = '/workspace/'
+// export const HOME = '/home/dk_deepak_001/dev/packages/workspace/react/'
 export function initWs(httpServer: HttpServer) {
 
   let timer: Date | null = new Date()
-  console.log(timer)
   const checkDisconnectStatus = (callback: () => void) => {
     console.log("Checking for disconnecting ")
     if (timer) {
@@ -34,6 +33,16 @@ export function initWs(httpServer: HttpServer) {
 
 
   io.on("connection", async (socket) => {
+
+    const host = socket.handshake.headers.host;
+    console.log(`host is ${host}`);
+
+    const socketUrl = (socket.handshake.url.split('?')[1].split('&').map(val => {
+      return val.split('=')
+    }))
+    const containerId = socketUrl[0][1]
+    console.log(containerId)
+
     timer = null
     socket.on("disconnect", async () => {
       try {
@@ -48,7 +57,7 @@ export function initWs(httpServer: HttpServer) {
       checkDisconnectStatus(async () => {
         try {
           console.log("User disconnected for more than 30 minutes");
-          // await fetch(`${process.env.ORCHESTRATOR_URL}/stop?nodeId=${language}-${userId}`)
+          await fetch(`http://34.16.169.164:4000/stop?containerId=${containerId}`)
         } catch (error) {
           console.log(error)
         }
@@ -78,6 +87,16 @@ export function initWs(httpServer: HttpServer) {
       })
     })
 
+    socket.on("save", async ({ path, content }: { path: string, content: string }, callback) => {
+      try {
+        await saveFile({ path, content });
+        callback();
+      } catch (error) {
+        console.log(error)
+      }
+    })
+
+
     socket.on("requestTerminal", async (userId) => {
       try {
         terminalManager.createPty(socket.id, userId, (data, pid) => {
@@ -105,4 +124,18 @@ export function initWs(httpServer: HttpServer) {
 }
 
 
+
+
+
+const saveFile = ({ path, content }: { path: string, content: string }) => {
+  return new Promise((resolve, reject) => {
+    fs.writeFile(path, content, { encoding: "utf8" }, (err) => {
+      if (err) {
+        console.log("err", err)
+        return reject(err)
+      }
+      resolve(() => { });
+    })
+  })
+}
 

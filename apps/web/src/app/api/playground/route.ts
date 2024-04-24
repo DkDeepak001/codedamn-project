@@ -5,7 +5,6 @@ import { PlayGrounds, prisma } from "@repo/database"
 export async function POST(req: Request) {
   const { projectName, language, userId } = await req.json() as CreateRequsetData
   if (!projectName || !language || !userId) return Response.json({ message: "error" })
-  console.log(projectName, language, userId)
   const fileLocation = await copyS3Folder({ baseCodeUrl: language.baseCodeUri!, projectName: projectName, userId })
 
   const creatingContainer = await fetch(`${process.env.BACKEND_URL}/script`, {
@@ -17,7 +16,6 @@ export async function POST(req: Request) {
   })
 
   const res = await creatingContainer?.json()
-  console.log(res)
   const project = await prisma.projects.create({
     data: {
       title: projectName,

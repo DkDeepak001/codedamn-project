@@ -10,6 +10,8 @@ import { Output } from "@/components/output";
 import dynamic from "next/dynamic";
 import { useSearchParams } from "next/navigation";
 import { Projects } from "@repo/database";
+import { ClipLoader } from "react-spinners";
+import { useAuth } from "@clerk/nextjs";
 
 const DynamicTerminalComponent = dynamic(() => import('@/components/terminal').then(m => m.XTerminal), {
   ssr: false
@@ -20,9 +22,9 @@ export type SelectedFileType = Omit<FileTreeType, 'children' | 'expanded'>
 
 export default function Playground() {
   const projectId = useSearchParams().get('projectId')
-  console.log(projectId)
+  const { userId } = useAuth()
   const [project, setProject] = useState<Projects>()
-
+  const [loading, setLoading] = useState(true)
   useEffect(() => {
     if (!projectId) return
 
@@ -34,7 +36,7 @@ export default function Playground() {
     fetchUrl()
   }, [projectId])
 
-  const socket = useSocket({ wsUrl: project?.terminalUrl! })
+  const socket = useSocket({ wsUrl: project?.terminalUrl!, containerId: `${userId}-${project?.title}` })
   console.log(socket)
   const [selectedFile, setSelectedFile] = useState<SelectedFileType>()
   const [serverFiles, setServerFiles] = useState<FileTreeType>()
@@ -43,6 +45,7 @@ export default function Playground() {
   useEffect(() => {
     if (!socket) return
     socket.on('getInitialFiles', ({ rootDir }: { rootDir: FileTreeType }) => {
+      setLoading(false)
       setServerFiles({
         ...rootDir,
         expanded: true
@@ -65,7 +68,14 @@ export default function Playground() {
     });
   }
 
-  if (!serverFiles) return
+  if (loading) {
+    return (<div className="h-screen w-screen flex items-center justify-center">
+      <div className="flex flex-row gap-x-5">
+        <ClipLoader color="#fff" />
+        <h2 className="font-semibold text-xl">Loading...</h2>
+      </div>
+    </div>)
+  }
 
   return (
     <div className="h-screen w-screen">
@@ -73,7 +83,7 @@ export default function Playground() {
         <ResizablePanel defaultSize={15} className="p-3" minSize={5} maxSize={20}>
           <FileTree
             selectedFile={selectedFile!}
-            rootDir={serverFiles}
+            rootDir={serverFiles!}
             setRootDir={setServerFiles}
             socket={socket}
             setSelectedFile={(file: SelectedFileType) => handleFileSelect(file)} />
@@ -87,6 +97,8 @@ export default function Playground() {
                 recentFiles={recentFiles}
                 setSelectedFile={(file: SelectedFileType) => setSelectedFile(file)}
                 removeFromRecent={(file: SelectedFileType) => handleRemoveFromRecent(file)}
+                socket={socket}
+                project={project!}
               />
             </ResizablePanel>
             <ResizableHandle withHandle />

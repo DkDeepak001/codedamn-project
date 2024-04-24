@@ -12,8 +12,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { useCreatePlayGround } from '@/store/modal';
 import { useState } from 'react';
 import { useAuth } from '@clerk/nextjs';
-import { redirect } from 'next/navigation'
-
+import { ClipLoader } from 'react-spinners'
 
 export const SetupPlayGround = () => {
 
@@ -22,6 +21,8 @@ export const SetupPlayGround = () => {
     open: state.open,
     setOpen: state.setOpen
   }))
+
+  const [loading, setLoading] = useState(false)
 
 
   const [projectName, setProjectName] = useState("")
@@ -34,7 +35,7 @@ export const SetupPlayGround = () => {
     if (!isSignedIn) return toast({ title: "Please Sigin", description: "Please create a account to Continue", variant: "destructive" })
     if (projectName.trim().length === 0) return toast({ title: "Title Required", description: "Please Enter a Project Name to Continue", variant: "destructive" })
     if (projectName.trim().includes(" ")) return toast({ title: "Invalid Project Name", description: "Give project name like, my-awesome-project", variant: 'destructive' });
-
+    setLoading(true)
     try {
       const res = await fetch('/api/playground', {
         method: "POST",
@@ -50,6 +51,8 @@ export const SetupPlayGround = () => {
       setProjectName('')
     } catch (error) {
       console.log(error)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -73,10 +76,10 @@ export const SetupPlayGround = () => {
               />
             </div>
           </div>
-          <Button variant='secondary' onClick={handleCreate}>
-            Create a PlayGround
+          <Button variant='secondary' onClick={handleCreate} disabled={loading}>
+            {loading ? <ClipLoader color="#36d7b7" />
+              : 'Create a PlayGround'}
           </Button>
-
         </DialogHeader>
       </DialogContent>
     </Dialog>

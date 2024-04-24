@@ -33,6 +33,7 @@
     "react-dom": "^18.2.0",
     "react-iframe": "^1.8.5",
     "react-resizable-panels": "^2.0.18",
+    "react-spinners": "^0.13.8",
     "socket.io-client": "^4.7.5",
     "svix": "^1.21.0",
     "tailwind-merge": "^2.3.0",
