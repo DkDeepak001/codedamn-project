@@ -11,7 +11,6 @@ import { useRouter } from 'next/navigation';
 import { useToast } from '@/components/ui/use-toast';
 import { useCreatePlayGround } from '@/store/modal';
 import { useState } from 'react';
-import { useAuth } from '@clerk/nextjs';
 import { ClipLoader } from 'react-spinners'
 
 export const SetupPlayGround = () => {
@@ -27,26 +26,26 @@ export const SetupPlayGround = () => {
 
   const [projectName, setProjectName] = useState("")
   const { toast } = useToast()
-  const { isSignedIn, userId } = useAuth()
+  // const { isSignedIn, userId } = useAuth()
 
   const router = useRouter()
 
   const handleCreate = async () => {
-    if (!isSignedIn) return toast({ title: "Please Sigin", description: "Please create a account to Continue", variant: "destructive" })
+    // if (!isSignedIn) return toast({ title: "Please Sigin", description: "Please create a account to Continue", variant: "destructive" })
     if (projectName.trim().length === 0) return toast({ title: "Title Required", description: "Please Enter a Project Name to Continue", variant: "destructive" })
     if (projectName.trim().includes(" ")) return toast({ title: "Invalid Project Name", description: "Give project name like, my-awesome-project", variant: 'destructive' });
     setLoading(true)
     try {
-      const res = await fetch('/api/playground', {
-        method: "POST",
-        body: JSON.stringify({
-          userId,
-          language,
-          projectName
-        })
-      })
-      const data = await res.json()
-      router.push(`playground?projectId=${data.project.id}`)
+      // const res = await fetch('/api/playground', {
+      //   method: "POST",
+      //   body: JSON.stringify({
+      //     userId,
+      //     language,
+      //     projectName
+      //   })
+      // })
+      // const data = await res.json()
+      router.push(`playground?projectId=${''}`)
       setOpen(false)
       setProjectName('')
       setLoading(false)

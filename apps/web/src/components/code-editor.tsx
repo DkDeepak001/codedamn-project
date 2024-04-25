@@ -7,8 +7,6 @@ import { SelectedFileType } from "@/app/playground/page";
 import { getLanguage } from "@/libs/getLanguage";
 import { useKey } from "@/hooks/useKeys";
 import { Socket } from "socket.io-client";
-import { useAmp } from "next/amp";
-import { useAuth } from "@clerk/nextjs";
 import { Projects } from "@repo/database";
 
 interface CodeProps {
@@ -26,7 +24,6 @@ export const Code = ({ selectedFile, recentFiles, setSelectedFile, removeFromRec
   const code = selectedFile.content
   let language = getLanguage(selectedFile.uri)
   const contentRef = useRef<string>("")
-  const { userId } = useAuth()
 
 
   const handleSave = async () => {
@@ -35,14 +32,14 @@ export const Code = ({ selectedFile, recentFiles, setSelectedFile, removeFromRec
         console.log("saving file client")
         selectedFile.content = contentRef.current
       })
-      const s3Key = `code/${userId}/${project.title}/${selectedFile.uri.replace("file:///workspace/", '')}`
-      await fetch('api/playground/code', {
-        method: "POST",
-        body: JSON.stringify({
-          filePath: s3Key,
-          content: contentRef.current
-        })
-      })
+      // const s3Key = `code/${userId}/${project.title}/${selectedFile.uri.replace("file:///workspace/", '')}`
+      // await fetch('api/playground/code', {
+      //   method: "POST",
+      //   body: JSON.stringify({
+      //     filePath: s3Key,
+      //     content: contentRef.current
+      //   })
+      // })
 
 
     } catch (error) {

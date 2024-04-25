@@ -15,17 +15,17 @@ export const RecentPlayGround = (p: RecentPlayGroundProps) => {
   const handleOpen = async () => {
     setLoading(true)
     try {
-      const res = await fetch('/api/playground', {
-        method: "POST",
-        body: JSON.stringify({
-          projectId: p.id,
-          userId: p.userId,
-          language: p.playGround.language,
-          projectName: p.title
-        })
-      })
-      const data = await res.json()
-      router.push(`playground?projectId=${data.project.id}`)
+      // const res = await fetch('/api/playground', {
+      //   method: "POST",
+      //   body: JSON.stringify({
+      //     projectId: p.id,
+      //     userId: p.userId,
+      //     language: p.playGround.language,
+      //     projectName: p.title
+      //   })
+      // })
+      // const data = await res.json()
+      router.push(`playground?projectId=${''}`)
       setLoading(false)
       setLoading(false)
     } catch (error) {

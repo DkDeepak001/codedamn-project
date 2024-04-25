@@ -65,9 +65,9 @@ app.get('/stop', (req, res) => {
 
     exec(command, async (error, stdOut, stderr) => {
       if (stdout) {
-        await fetch(`http://34.125.240.204:3000/api/playground?projectId=${projectId}`, {
-          method: "DELETE"
-        })
+        // await fetch(`http://34.125.240.204:3000/api/playground?projectId=${projectId}`, {
+        //   method: "DELETE"
+        // })
       }
     })
     res.status(200).json({ meassage: "message" })

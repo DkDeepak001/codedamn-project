@@ -12,6 +12,7 @@ Codedamn Playground Clone is a web application that allows users to create proje
 - **Docker:** Platform for containerization used to package applications and dependencies.
 - **S3:** Object storage service used for storing code.
 - **Postgress**: Database to store user details 
+- **Clerk**: For Authentication and  User Management
 
 
 ## Prerequisites:
@@ -19,12 +20,13 @@ Codedamn Playground Clone is a web application that allows users to create proje
 - Docker 
 - s3 
 - Postgress
+- clerk account
 
 ## Steps To Run Locally
 1. Clone the Repository:
 ```
 git clone https://github.com/DkDeepak001/codedamn-project
-cd replit
+cd codedamn-project
 ```
 2. Install Dependencies:
 ```
@@ -35,7 +37,15 @@ npm install
 ```
 cp .env.example .env
 ```
-4. Access the Application:
+
+4.Create a webhook for user signup in clerk:
+```
+${app_url}/api/user
+```
+select user event when creating webhook
+
+
+5. Access the Application:
 ```
 http://localhost:3000
 ```

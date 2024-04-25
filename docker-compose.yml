@@ -1,19 +1,26 @@
-version: "3"
-
-volumes:
-  database:
-    driver: local
+version: '3'
 
 services:
-  mysql:
-    platform: linux/amd64
-    image: mysql:8.0.32
-    container_name: turborepo_mysql
-    restart: always
+  frontend:
+    image: dkdeepak001/codedamn-web:dev0.0.4
     ports:
-      - 3306:3306
+      - "3000:3000"
+    networks:
+      - my-network
+  
+  backend:
+    image: dkdeepak001/codedamn:v0.0.11
+    ports:
+      - "3001:3001"
+      - "4000:4000"
     environment:
-      MYSQL_DATABASE: turborepo
-      MYSQL_ALLOW_EMPTY_PASSWORD: 1
-    volumes:
-      - database:/var/lib/mysql
+      S3_URL: s3://deepak-replit/baseCode/react
+      AWS_ACCESS_KEY_ID:  
+      AWS_SECRET_ACCESS_KEY: 
+    networks:
+      - my-network
+
+networks:
+  my-network:
+    driver: bridge
+

@@ -1,10 +1,9 @@
 import { prisma } from "@repo/database"
-import { currentUser } from '@clerk/nextjs/server';
 import { RecentPlayGround } from "./client";
 
 
 export const RecentPlayGrounds = async () => {
-  const user = await currentUser();
+  const user = { id: '' };
 
   const projects = await getProjects(user?.id!)
 
