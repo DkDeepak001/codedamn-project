@@ -1,14 +1,16 @@
-import { Server } from "socket.io";
+import { Server, Socket } from "socket.io";
 import { Server as HttpServer } from "http";
 import * as fs from 'fs'
 import { getTreeNode } from "@sinm/react-file-tree/lib/node";
 import { TerminalManager } from "./utils/pty";
+import path from 'path'
+import chokidar from 'chokidar';
 
 
 const terminalManager = new TerminalManager()
 
 export const HOME = '/workspace/'
-// export const HOME = '/home/dk_deepak_001/dev/packages/workspace/react/'
+// export const HOME = '/home/dk_deepak_001/dev/packages/workspace/next/'
 export function initWs(httpServer: HttpServer) {
 
   let timer: Date | null = new Date()
@@ -74,8 +76,20 @@ export function initWs(httpServer: HttpServer) {
 
 
     socket.on('getNestedFiles', async ({ uri }: { uri: string }) => {
-      const nestedFiles = await getTreeNode(uri)
-      socket.emit('nestedFiles', { uri, nestedFiles });
+      const currentDir = uri.replace('file://', '')
+      fs.readdir(currentDir, async (err, files) => {
+        if (files.length === 0) return
+        console.log(files)
+        files.map(f => {
+          const filePath = path.join(currentDir, f)
+          fs.stat(filePath, async (err, stats) => {
+            console.log(stats)
+            const nestedFiles = await getTreeNode(currentDir)
+            socket.emit('nestedFiles', { uri, nestedFiles });
+          })
+        })
+
+      })
     });
 
     socket.on('loadFile', async ({ uri }: { uri: string }, callback) => {
@@ -120,13 +134,58 @@ export function initWs(httpServer: HttpServer) {
         console.log(error)
       }
     })
+    watchDirRecursive(HOME, socket, async (filePath) => {
+      console.log("callback", filePath)
+
+      socket.emit("getInitialFiles", {
+        rootDir: await getTreeNode(filePath)
+      })
+
+    })
+
+
+
+    fs.watch(HOME, async () => {
+      socket.emit("getInitialFiles", {
+        rootDir: await getTreeNode(HOME)
+      })
+    });
   });
 
 
 }
 
+function watchDirRecursive(dir: string, socket: Socket, cb: (uri: string) => Promise<void>) {
 
+  const watcher = chokidar.watch(dir, { persistent: true, ignoreInitial: true, alwaysStat: true, followSymlinks: true });
 
+  // watcher.on('all', async (event, filePath) => {
+  //   console.log(`File ${filePath} changed (${event})`);
+  //   cb(filePath);
+  // });
+  //
+  watcher.on('error', (error) => {
+    console.error('Error watching directory:', error);
+  });
+
+  // watcher.on('add', async (newfile) => {
+  //   console.log(`New File ${newfile} added`, dir);
+  //   const nestedFiles = await getTreeNode(dir)
+  //   console.log(nestedFiles)
+  //   socket.emit('newFile', { uri: dir, nestedFiles });
+  //
+  // })
+
+  watcher.on('addDir', async (newDir) => {
+    console.log(`New directory ${newDir} added`);
+    cb(dir)
+    watchDirRecursive(newDir, socket, async (filePath) => {
+      const nestedFiles = await getTreeNode(filePath)
+      socket.emit('newFile', { uri: filePath, nestedFiles });
+
+    });
+  });
+}
 
 
 const saveFile = ({ path, content }: { path: string, content: string }) => {

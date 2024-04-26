@@ -22,4 +22,8 @@ EXPOSE 4000
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["node", "dist/index.js"]
+RUN useradd -ms /bin/bash user
+RUN mkdir /workspace/ && chown user:user /workspace/
+USER user
+
 

@@ -27,8 +27,15 @@ export const FileTree = ({ rootDir, socket, setSelectedFile, selectedFile, setRo
 
   useEffect(() => {
     socket.on('nestedFiles', ({ uri, nestedFiles }: { uri: string, nestedFiles: FileTreeType }) => {
+      console.log(uri, nestedFiles, "recviing=============")
+      setRootDir((tree: FileTreeType | undefined) =>
+        utils.assignTreeNode(tree, uri, { children: nestedFiles.children })!
+      );
+
       utils.appendTreeNode(rootDir, uri, nestedFiles)
+
     })
+
   }, [])
 
   const toggleExpanded: TreeProps["onItemClick"] = (treeNode: TreeNode) => {
