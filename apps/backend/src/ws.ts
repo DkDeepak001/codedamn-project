@@ -5,13 +5,12 @@ import { getTreeNode } from "@sinm/react-file-tree/lib/node";
 import { TerminalManager } from "./utils/pty";
 import path from 'path'
 import chokidar from 'chokidar';
-import { Braket } from "aws-sdk";
 
 
 const terminalManager = new TerminalManager()
 
-// export const HOME = '/workspace/'
-export const HOME = '/home/dk_deepak_001/dev/packages/workspace/next/'
+export const HOME = '/workspace/'
+// export const HOME = '/home/dk_deepak_001/dev/packages/workspace/next/'
 export function initWs(httpServer: HttpServer) {
 
   let timer: Date | null = new Date()
@@ -62,7 +61,7 @@ export function initWs(httpServer: HttpServer) {
       checkDisconnectStatus(async () => {
         try {
           console.log("User disconnected for more than 30 minutes");
-          // await fetch(`http://34.125.240.204:4000/stop?containerId=${containerId}&projectId=${projectId}`)
+          await fetch(`http://34.125.240.204:4000/stop?containerId=${containerId}&projectId=${projectId}`)
         } catch (error) {
           console.log(error)
         }
@@ -200,7 +199,20 @@ export function initWs(httpServer: HttpServer) {
 
 function watchDirRecursive(dir: string, socket: Socket, cb: (uri: string) => Promise<void>) {
 
-  const watcher = chokidar.watch(dir, { persistent: true, ignoreInitial: true, alwaysStat: true, followSymlinks: true });
+  const dirsToIgnore = ['node_modules', '.git', '.next'];
+  const ignoredPaths = dirsToIgnore.filter(dir => fs.existsSync(dir));
+
+  const watcher = chokidar.watch(dir, {
+    persistent: true,
+    ignoreInitial: true,
+    alwaysStat: true,
+    followSymlinks: true,
+    ignored: [
+      //@ts-ignore
+      ...ignoredPaths.map(path => (path) => path.includes(path)),
+    ]
+  });
+
 
 
   watcher.on('error', (error) => {

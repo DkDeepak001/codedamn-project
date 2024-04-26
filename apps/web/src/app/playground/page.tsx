@@ -97,7 +97,7 @@ export default function Playground() {
     return (<div className="h-screen w-screen flex items-center justify-center">
       <div className="flex flex-row gap-x-5">
         <ClipLoader color="#fff" />
-        <h2 className="font-semibold text-xl">Loading...</h2>
+        <h2 className="font-semibold text-xl">Installing npm dependencies...</h2>
       </div>
     </div>)
   }

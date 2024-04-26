@@ -13,13 +13,11 @@ if [ -z "$S3_URL" ]; then
 else
 	download_from_s3
 
+	cd /workspace
 	# Install npm dependencies
 	echo "Installing npm dependencies..."
 	npm install
 
-	# Run development server
-	echo "Running development server..."
-	npm run dev
 fi
 
 # Start the main application
