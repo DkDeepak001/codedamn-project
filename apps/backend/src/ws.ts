@@ -5,12 +5,13 @@ import { getTreeNode } from "@sinm/react-file-tree/lib/node";
 import { TerminalManager } from "./utils/pty";
 import path from 'path'
 import chokidar from 'chokidar';
+import { Braket } from "aws-sdk";
 
 
 const terminalManager = new TerminalManager()
 
-export const HOME = '/workspace/'
-// export const HOME = '/home/dk_deepak_001/dev/packages/workspace/next/'
+// export const HOME = '/workspace/'
+export const HOME = '/home/dk_deepak_001/dev/packages/workspace/next/'
 export function initWs(httpServer: HttpServer) {
 
   let timer: Date | null = new Date()
@@ -78,9 +79,9 @@ export function initWs(httpServer: HttpServer) {
     socket.on('getNestedFiles', async ({ uri }: { uri: string }) => {
       const currentDir = uri.replace('file://', '')
       fs.readdir(currentDir, async (err, files) => {
-        if (files.length === 0) return
+        if (files?.length === 0) return
         console.log(files)
-        files.map(f => {
+        files?.map(f => {
           const filePath = path.join(currentDir, f)
           fs.stat(filePath, async (err, stats) => {
             console.log(stats)
@@ -109,6 +110,48 @@ export function initWs(httpServer: HttpServer) {
         callback();
       } catch (error) {
         console.log(error)
+      }
+    })
+
+    socket.on('createNew', ({ fileName, uri }: { fileName: string, uri: string }) => {
+      const fullPath = path.join(uri.replace("file://", ''), fileName)
+      const paths = fullPath.split("/")
+      let tmp: string = ""
+      console.log(fullPath)
+      paths.map((p) => {
+        if (tmp !== '') {
+          console.log(path.extname(p), "extname", p)
+          if (path.extname(p) !== '') {
+            const fileLoc = `${tmp}${p}`
+            console.log(fileLoc)
+            if (!fs.existsSync(fileLoc)) {
+              console.log("create file", fileLoc)
+              fs.writeFileSync(fileLoc, '')
+            }
+          } else {
+            const dirLoc = `${tmp}${p}`
+            if (!fs.existsSync(dirLoc)) {
+              console.log("create folder", dirLoc)
+              fs.mkdirSync(dirLoc)
+            }
+          }
+        }
+        tmp += `${p}/`
+      })
+
+    })
+
+    socket.on('delete', ({ uri }: { uri: string }) => {
+      try {
+        const loc = uri.replace('file://', '')
+
+        if (fs.existsSync(loc)) {
+          console.log('rm')
+          fs.rmSync(loc, { recursive: true })
+        }
+
+      } catch (error) {
+
       }
     })
 
@@ -159,23 +202,22 @@ function watchDirRecursive(dir: string, socket: Socket, cb: (uri: string) => Pro
 
   const watcher = chokidar.watch(dir, { persistent: true, ignoreInitial: true, alwaysStat: true, followSymlinks: true });
 
-  // watcher.on('all', async (event, filePath) => {
-  //   console.log(`File ${filePath} changed (${event})`);
-  //   cb(filePath);
-  // });
-  //
+
   watcher.on('error', (error) => {
     console.error('Error watching directory:', error);
   });
 
-  // watcher.on('add', async (newfile) => {
-  //   console.log(`New File ${newfile} added`, dir);
-  //   const nestedFiles = await getTreeNode(dir)
-  //   console.log(nestedFiles)
-  //   socket.emit('newFile', { uri: dir, nestedFiles });
-  //
-  // })
+  watcher.on('add', async (newfile) => {
+    console.log(`New File ${newfile} added`, dir);
+    cb(dir)
 
+  })
+
+  watcher.on('unlink', async (newfile) => {
+    console.log(` File deleted ${newfile} `, dir);
+    cb(dir)
+
+  })
   watcher.on('addDir', async (newDir) => {
     console.log(`New directory ${newDir} added`);
     cb(dir)
@@ -185,6 +227,16 @@ function watchDirRecursive(dir: string, socket: Socket, cb: (uri: string) => Pro
 
     });
   });
+  watcher.on('unlink', async (newDir) => {
+    console.log(`Folder deleted ${newDir} `);
+    cb(dir)
+    watchDirRecursive(newDir, socket, async (filePath) => {
+      const nestedFiles = await getTreeNode(filePath)
+      socket.emit('newFile', { uri: filePath, nestedFiles });
+
+    });
+  });
+
 }
 
 

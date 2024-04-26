@@ -12,7 +12,6 @@ import { useSearchParams } from "next/navigation";
 import { Projects } from "@repo/database";
 import { ClipLoader } from "react-spinners";
 import { useAuth } from "@clerk/nextjs";
-import { utils } from "@sinm/react-file-tree";
 
 const DynamicTerminalComponent = dynamic(() => import('@/components/terminal').then(m => m.XTerminal), {
   ssr: false
@@ -37,6 +36,7 @@ export default function Playground() {
     fetchUrl()
   }, [projectId])
 
+
   const socket = useSocket({
     wsUrl: project?.terminalUrl!,
     containerId: `${userId}-${project?.title}`,
@@ -50,7 +50,6 @@ export default function Playground() {
   useEffect(() => {
     if (!socket) return
     socket.on('getInitialFiles', ({ rootDir }: { rootDir: FileTreeType }) => {
-      console.log("loading initalFile")
       setLoading(false)
       setServerFiles({
         ...rootDir,
@@ -60,19 +59,15 @@ export default function Playground() {
     socket.on('newFile', ({ uri, nestedFiles }: { uri: string, nestedFiles: FileTreeType }) => {
       console.log("newfile in", uri, nestedFiles)
       addChildNode(uri, nestedFiles);
-
     })
 
 
   }, [socket])
+  console.log(serverFiles)
   const addChildNode = (uriToAddChildTo: string, childNode: FileTreeType) => {
-    console.log("add child", uriToAddChildTo)
     setServerFiles((prevServerFiles: FileTreeType | undefined) => {
-      console.log(prevServerFiles, "prev")
-
-
       const addFileToNode = (node: FileTreeType): FileTreeType => {
-        if (uriToAddChildTo === node.uri.replace('file://', '')) return { ...node, children: childNode.children }
+        if (uriToAddChildTo === node.uri.replace('file://', '')) return { ...node, children: childNode.children, expanded: true }
         return node
       }
 
