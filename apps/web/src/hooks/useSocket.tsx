@@ -12,15 +12,15 @@ const useSocket = ({ wsUrl, containerId, projectId }: SocketProps): Socket => {
 
 
   useEffect(() => {
-    // if (!wsUrl) return
-    const newSocket = io('http://localhost:3001', { query: { containerId, projectId }, })
-    // const newSocket = io(wsUrl, {
-    //   extraHeaders: {
-    //     'Access-Control-Allow-Origin': '*'
-    //   },
-    //   rejectUnauthorized: false,
-    //   query: { containerId, projectId }
-    // })
+    if (!wsUrl) return
+    // const newSocket = io('http://localhost:3001', { query: { containerId, projectId }, })
+    const newSocket = io(wsUrl, {
+      extraHeaders: {
+        'Access-Control-Allow-Origin': '*'
+      },
+      rejectUnauthorized: false,
+      query: { containerId, projectId }
+    })
 
     setSocket(newSocket);
     return () => {

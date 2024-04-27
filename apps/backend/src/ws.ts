@@ -9,8 +9,8 @@ import chokidar from 'chokidar';
 
 const terminalManager = new TerminalManager()
 
-export const HOME = '/workspace/'
-// export const HOME = '/home/dk_deepak_001/dev/packages/workspace/next/'
+// export const HOME = '/workspace/'
+export const HOME = '/home/dk_deepak_001/dev/packages/workspace/next/'
 export function initWs(httpServer: HttpServer) {
 
   let timer: Date | null = new Date()
@@ -199,8 +199,6 @@ export function initWs(httpServer: HttpServer) {
 
 function watchDirRecursive(dir: string, socket: Socket, cb: (uri: string) => Promise<void>) {
 
-  const dirsToIgnore = ['node_modules', '.git', '.next'];
-  const ignoredPaths = dirsToIgnore.filter(dir => fs.existsSync(dir));
 
   const watcher = chokidar.watch(dir, {
     persistent: true,
@@ -208,8 +206,9 @@ function watchDirRecursive(dir: string, socket: Socket, cb: (uri: string) => Pro
     alwaysStat: true,
     followSymlinks: true,
     ignored: [
-      //@ts-ignore
-      ...ignoredPaths.map(path => (path) => path.includes(path)),
+      (path) => path.includes('node_modules'),
+      (path) => { fs.existsSync(`${dir}/.next`); return path.includes('.next') },
+      (path) => { fs.existsSync(`${dir}/.git`); return path.includes('.git') }
     ]
   });
 
