@@ -4,20 +4,19 @@ import * as fs from 'fs'
 import { getTreeNode } from "@sinm/react-file-tree/lib/node";
 import { TerminalManager } from "./utils/pty";
 import path from 'path'
-import chokidar from 'chokidar';
-
+import { saveFile, watchDirRecursive } from "./utils/fs";
 
 const terminalManager = new TerminalManager()
 
 // export const HOME = '/workspace/'
-export const HOME = '/home/dk_deepak_001/dev/packages/workspace/next/'
+export const HOME = '/home/dk_deepak_001/dev/packages/workspace/node/'
+
 export function initWs(httpServer: HttpServer) {
 
   let timer: Date | null = new Date()
+
   const checkDisconnectStatus = (callback: () => void) => {
-    console.log("Checking for disconnecting ")
     if (timer) {
-      console.log("User disconnected")
       const currentTime = new Date();
       const timeDifference = currentTime.getTime() - timer.getTime();
       if (timeDifference > 20 * 60 * 1000) {
@@ -37,17 +36,15 @@ export function initWs(httpServer: HttpServer) {
   io.on("connection", async (socket) => {
 
     const host = socket.handshake.headers.host;
-    console.log(`host is ${host}`);
 
-    const socketUrl = (socket.handshake.url.split('?')[1].split('&').map(val => {
-      return val.split('=')
-    }))
-    const containerId = socketUrl[0][1]
-    const projectId = socketUrl[1][1]
+    const containerId = socket.handshake.query.containerId;
+    const projectId = socket.handshake.query.projectId;
 
-    console.log(containerId, projectId)
+
+    console.log(`host is ${host} ${containerId} ${projectId}`);
 
     timer = null
+
     socket.on("disconnect", async () => {
       try {
         timer = new Date()
@@ -56,6 +53,7 @@ export function initWs(httpServer: HttpServer) {
         console.log(error)
       }
     });
+
     // Check for user disconnected
     setInterval(() => {
       checkDisconnectStatus(async () => {
@@ -69,21 +67,26 @@ export function initWs(httpServer: HttpServer) {
     }, 4 * 60 * 1000);
 
 
+
     socket.emit("getInitialFiles", {
       rootDir: await getTreeNode(HOME)
     })
 
+    // Watch only Root Dir
+    fs.watch(HOME, async () => {
+      socket.emit("getInitialFiles", {
+        rootDir: await getTreeNode(HOME)
+      })
+    });
 
 
     socket.on('getNestedFiles', async ({ uri }: { uri: string }) => {
       const currentDir = uri.replace('file://', '')
       fs.readdir(currentDir, async (err, files) => {
         if (files?.length === 0) return
-        console.log(files)
         files?.map(f => {
           const filePath = path.join(currentDir, f)
-          fs.stat(filePath, async (err, stats) => {
-            console.log(stats)
+          fs.stat(filePath, async () => {
             const nestedFiles = await getTreeNode(currentDir)
             socket.emit('nestedFiles', { uri, nestedFiles });
           })
@@ -103,20 +106,11 @@ export function initWs(httpServer: HttpServer) {
       })
     })
 
-    socket.on("save", async ({ path, content }: { path: string, content: string }, callback) => {
-      try {
-        await saveFile({ path, content });
-        callback();
-      } catch (error) {
-        console.log(error)
-      }
-    })
 
     socket.on('createNew', ({ fileName, uri }: { fileName: string, uri: string }) => {
       const fullPath = path.join(uri.replace("file://", ''), fileName)
       const paths = fullPath.split("/")
       let tmp: string = ""
-      console.log(fullPath)
       paths.map((p) => {
         if (tmp !== '') {
           console.log(path.extname(p), "extname", p)
@@ -137,24 +131,41 @@ export function initWs(httpServer: HttpServer) {
         }
         tmp += `${p}/`
       })
-
     })
 
     socket.on('delete', ({ uri }: { uri: string }) => {
       try {
         const loc = uri.replace('file://', '')
-
         if (fs.existsSync(loc)) {
-          console.log('rm')
           fs.rmSync(loc, { recursive: true })
         }
-
       } catch (error) {
 
       }
     })
 
 
+    socket.on("save", async ({ path, content }: { path: string, content: string }, callback) => {
+      try {
+        await saveFile({ path, content });
+        callback();
+      } catch (error) {
+        console.log(error)
+      }
+    })
+
+
+
+    watchDirRecursive(HOME, socket, async (filePath) => {
+      console.log("callback", filePath)
+      socket.emit("getInitialFiles", {
+        rootDir: await getTreeNode(filePath)
+      })
+    })
+
+
+
+    //Terminal Events 
     socket.on("requestTerminal", async (userId) => {
       try {
         terminalManager.createPty(socket.id, userId, (data, pid) => {
@@ -176,90 +187,13 @@ export function initWs(httpServer: HttpServer) {
         console.log(error)
       }
     })
-    watchDirRecursive(HOME, socket, async (filePath) => {
-      console.log("callback", filePath)
 
-      socket.emit("getInitialFiles", {
-        rootDir: await getTreeNode(filePath)
-      })
-
-    })
-
-
-
-    fs.watch(HOME, async () => {
-      socket.emit("getInitialFiles", {
-        rootDir: await getTreeNode(HOME)
-      })
-    });
   });
 
 
 }
 
-function watchDirRecursive(dir: string, socket: Socket, cb: (uri: string) => Promise<void>) {
-
-
-  const watcher = chokidar.watch(dir, {
-    persistent: true,
-    ignoreInitial: true,
-    alwaysStat: true,
-    followSymlinks: true,
-    ignored: [
-      (path) => path.includes('node_modules'),
-      (path) => { fs.existsSync(`${dir}/.next`); return path.includes('.next') },
-      (path) => { fs.existsSync(`${dir}/.git`); return path.includes('.git') }
-    ]
-  });
 
 
 
-  watcher.on('error', (error) => {
-    console.error('Error watching directory:', error);
-  });
-
-  watcher.on('add', async (newfile) => {
-    console.log(`New File ${newfile} added`, dir);
-    cb(dir)
-
-  })
-
-  watcher.on('unlink', async (newfile) => {
-    console.log(` File deleted ${newfile} `, dir);
-    cb(dir)
-
-  })
-  watcher.on('addDir', async (newDir) => {
-    console.log(`New directory ${newDir} added`);
-    cb(dir)
-    watchDirRecursive(newDir, socket, async (filePath) => {
-      const nestedFiles = await getTreeNode(filePath)
-      socket.emit('newFile', { uri: filePath, nestedFiles });
-
-    });
-  });
-  watcher.on('unlink', async (newDir) => {
-    console.log(`Folder deleted ${newDir} `);
-    cb(dir)
-    watchDirRecursive(newDir, socket, async (filePath) => {
-      const nestedFiles = await getTreeNode(filePath)
-      socket.emit('newFile', { uri: filePath, nestedFiles });
-
-    });
-  });
-
-}
-
-
-const saveFile = ({ path, content }: { path: string, content: string }) => {
-  return new Promise((resolve, reject) => {
-    fs.writeFile(path, content, { encoding: "utf8" }, (err) => {
-      if (err) {
-        console.log("err", err)
-        return reject(err)
-      }
-      resolve(() => { });
-    })
-  })
-}
 

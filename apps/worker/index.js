@@ -1,7 +1,6 @@
 const express = require('express');
 const { exec } = require('child_process');
 const fs = require('fs');
-const { stdout } = require('process');
 
 
 const app = express();
@@ -24,7 +23,6 @@ app.post('/script', (req, res) => {
     }
 
     if (dStdOut) {
-
       console.log(`Container deployed successfully for user: ${userId}`);
       console.log(`Script output: ${dStdOut}`);
       exec(`./port.sh ${arg1}`, (error, stdout, stderr) => {
@@ -46,8 +44,8 @@ app.post('/script', (req, res) => {
 
           return res.status(200).json({
             message: `Container deployed successfully for user: ${userId}`,
-            terminalUrl: `http://34.16.169.164:${ports1}`,
-            outputUrl: `http://34.16.169.164:${ports2}`
+            terminalUrl: `http://34.125.240.204:${ports1}`,
+            outputUrl: `http://34.125.240.204:${ports2}`
           })
         }
         if (stderr) res.status(500).json({ message: stderr.toString() })
@@ -64,7 +62,7 @@ app.get('/stop', (req, res) => {
     const command = `./stop.sh ${arg1}`;
 
     exec(command, async (error, stdOut, stderr) => {
-      if (stdout) {
+      if (stdOut) {
         await fetch(`http://34.125.240.204:3000/api/playground?projectId=${projectId}`, {
           method: "DELETE"
         })
@@ -89,6 +87,5 @@ app.get('/health', (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
-
 
 

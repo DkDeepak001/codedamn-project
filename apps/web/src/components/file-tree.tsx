@@ -12,38 +12,10 @@ import { Socket } from 'socket.io-client';
 import orderBy from "lodash/orderBy";
 import { FileTreeType, SelectedFileType } from '@/app/playground/page';
 import { TreeNode } from '@sinm/react-file-tree';
-import { Delete, DeleteIcon, FilePlus2, FolderPlus, Trash2 } from 'lucide-react';
+import { FilePlus2, } from 'lucide-react';
 import { useToast } from './ui/use-toast';
 import { ContextMenuContent, ContextMenuItem, ContextMenu, ContextMenuTrigger } from './ui/context-menu';
 
-const itemRenderer = (treeNode: FileTreeType, setRootDir: FileTreeProps['setRootDir'], handleDel: (uri: string) => void, handleCreate: () => void, setCurrentDir: (uri: string) => void) => {
-  const handleToggle = () => {
-    setRootDir((tree: FileTreeType | undefined) =>
-      utils.assignTreeNode(tree, treeNode.uri, { expanded: !treeNode.expanded })!
-    );
-  }
-
-  const handleClickCreate = (uri: string) => {
-    handleCreate()
-    setCurrentDir(uri)
-  }
-
-  return (
-    <div className="flex items-start w-3/4">
-      <ContextMenu>
-        <ContextMenuTrigger>
-          <ContextMenuContent className='z-10'  >
-            {treeNode?.type === 'directory' && <ContextMenuItem onClick={() => handleClickCreate(treeNode.uri)}>Create file</ContextMenuItem>}
-            <ContextMenuItem onClick={() => handleDel(treeNode.uri)}>Delete file</ContextMenuItem>
-          </ContextMenuContent>
-          <div className='z-0' onClick={handleToggle}>
-            <FileItemWithFileIcon treeNode={treeNode} />
-          </div>
-        </ContextMenuTrigger>
-      </ContextMenu>
-    </div>
-  );
-};
 
 interface FileTreeProps {
   selectedFile: SelectedFileType
@@ -54,10 +26,13 @@ interface FileTreeProps {
 }
 
 export const FileTree = ({ rootDir, socket, setSelectedFile, selectedFile, setRootDir }: FileTreeProps) => {
+
   const { toast } = useToast()
   const [toggledInput, setToggleInput] = useState(false)
   const [fileName, setFileName] = useState('')
   const [openedDir, setOpenedDir] = useState(rootDir.uri)
+
+
   useEffect(() => {
     socket.on('nestedFiles', ({ uri, nestedFiles }: { uri: string, nestedFiles: FileTreeType }) => {
       setRootDir((tree: FileTreeType | undefined) =>
@@ -81,24 +56,12 @@ export const FileTree = ({ rootDir, socket, setSelectedFile, selectedFile, setRo
         );
       })
     }
-    // setRootDir((tree: FileTreeType | undefined) =>
-    //   utils.assignTreeNode(tree, treeNode.uri, { expanded: !treeNode.expanded })!
-    // );
   };
 
   const fetchNestedFiles = (uri: string) => {
     socket.emit('getNestedFiles', { uri });
   };
 
-  const sorter = (treeNodes: FileTreeType[]) =>
-    orderBy(
-      treeNodes,
-      [
-        (node) => (node.type === "directory" ? 0 : 1),
-        (node) => utils.getFileName(node.uri),
-      ],
-      ["asc", "asc"]
-    );
 
   const handleCreate = () => {
     const invalidCharsRegex = /[:\\,?]/
@@ -133,18 +96,71 @@ export const FileTree = ({ rootDir, socket, setSelectedFile, selectedFile, setRo
         <div className='flex justify-end gap-x-4'>
           <FilePlus2 size={20} className='cursor-pointer' onClick={() => setToggleInput(!toggledInput)} />
         </div>
-
       </div>
       <Tree
         activatedUri={selectedFile?.uri ?? ""}
         tree={rootDir}
         onItemClick={toggleExpanded}
         sorter={sorter}
-        itemRenderer={(p) => itemRenderer(p, setRootDir, (uri: string) => handleDelete(uri), () => setToggleInput(true), (dir: string) => setOpenedDir(dir))}
-
+        itemRenderer={(props) => <ItemRenderer
+          treeNode={props}
+          handleDel={(uri: string) => handleDelete(uri)}
+          setCurrentDir={(dir: string) => setOpenedDir(dir)}
+          handleCreate={() => setToggleInput(true)}
+          setRootDir={setRootDir}
+        />}
       />
     </div>
-
   )
-
 }
+
+const sorter = (treeNodes: FileTreeType[]) =>
+  orderBy(
+    treeNodes,
+    [
+      (node) => (node.type === "directory" ? 0 : 1),
+      (node) => utils.getFileName(node.uri),
+    ],
+    ["asc", "asc"]
+  );
+
+
+
+
+type ItemRendererProps = {
+  treeNode: FileTreeType
+  setRootDir: FileTreeProps['setRootDir']
+  handleDel: (uri: string) => void
+  handleCreate: () => void
+  setCurrentDir: (uri: string) => void
+}
+
+const ItemRenderer = ({ treeNode, setRootDir, handleCreate, setCurrentDir, handleDel }: ItemRendererProps) => {
+  const handleToggle = () => {
+    setRootDir((tree: FileTreeType | undefined) =>
+      utils.assignTreeNode(tree, treeNode.uri, { expanded: !treeNode.expanded })!
+    );
+  }
+
+  const handleClickCreate = (uri: string) => {
+    handleCreate()
+    setCurrentDir(uri)
+  }
+
+  return (
+    <div className="flex items-start w-3/4">
+      <ContextMenu>
+        <ContextMenuTrigger>
+          <ContextMenuContent className='z-10'  >
+            {treeNode?.type === 'directory' && <ContextMenuItem onClick={() => handleClickCreate(treeNode.uri)}>Create file</ContextMenuItem>}
+            <ContextMenuItem onClick={() => handleDel(treeNode.uri)}>Delete file</ContextMenuItem>
+          </ContextMenuContent>
+          <div className='z-0' onClick={handleToggle}>
+            <FileItemWithFileIcon treeNode={treeNode} />
+          </div>
+        </ContextMenuTrigger>
+      </ContextMenu>
+    </div>
+  );
+};
+

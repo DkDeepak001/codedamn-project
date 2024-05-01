@@ -19,7 +19,9 @@ export default function IndexPage() {
         </div>
         <div className="flex gap-y-5 flex-col">
           <h2 className="font-semibold text-lg ">Recents</h2>
-          <RecentPlayGrounds />
+          <Suspense fallback={<h1>Loading...</h1>}>
+            <RecentPlayGrounds />
+          </Suspense>
         </div>
       </div>
       <SetupPlayGround />

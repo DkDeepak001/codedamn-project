@@ -1,7 +1,7 @@
 'use client'
 import { PlayGrounds } from "@repo/database"
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { useCreatePlayGround } from "@/store/modal"
+import { useCreatePlayGround } from "@/store/useCreatePlayground"
 
 export const PlayGound = (p: PlayGrounds) => {
   const { setLanguage, showModal } = useCreatePlayGround(state => ({

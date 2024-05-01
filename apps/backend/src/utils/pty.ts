@@ -5,13 +5,13 @@ import { HOME } from '../ws';
 const SHELL = "bash";
 
 export class TerminalManager {
-  private sessions: { [id: string]: { terminal: IPty, replId: string; } } = {};
+  private sessions: { [id: string]: { terminal: IPty, userId: string; } } = {};
 
   constructor() {
     this.sessions = {};
   }
 
-  createPty(id: string, replId: string, onData: (data: string, id: string) => void) {
+  createPty(id: string, userId: string, onData: (data: string, id: string) => void) {
     let term = fork(SHELL, [], {
       cols: 100,
       name: 'xterm',
@@ -24,7 +24,7 @@ export class TerminalManager {
     });
     this.sessions[id] = {
       terminal: term,
-      replId
+      userId
     };
     term.on('exit', () => {
       delete this.sessions[term.pid];

@@ -7,7 +7,6 @@ import { SelectedFileType } from "@/app/playground/page";
 import { getLanguage } from "@/libs/getLanguage";
 import { useKey } from "@/hooks/useKeys";
 import { Socket } from "socket.io-client";
-import { useAmp } from "next/amp";
 import { useAuth } from "@clerk/nextjs";
 import { Projects } from "@repo/database";
 
@@ -19,6 +18,7 @@ interface CodeProps {
   socket: Socket,
   project: Projects
 }
+
 export const Code = ({ selectedFile, recentFiles, setSelectedFile, removeFromRecent, socket, project }: CodeProps) => {
 
   if (!selectedFile) return null
@@ -49,6 +49,14 @@ export const Code = ({ selectedFile, recentFiles, setSelectedFile, removeFromRec
       console.log(error)
     }
   }
+  const debounceHandleSave = _.debounce(handleSave, 1000);
+
+
+  const debounce = (text: string) => {
+    contentRef.current = text ?? "";
+    debounceHandleSave();
+  };
+
 
   useKey({ key: 'ctrls', cb: handleSave })
 
@@ -73,7 +81,8 @@ export const Code = ({ selectedFile, recentFiles, setSelectedFile, removeFromRec
         value={code}
         theme="vs-dark"
         loading={<div className="text-white">Fetching content...</div>}
-        onChange={(text) => contentRef.current = text ?? ""}
+        onChange={(text) => debounce(text!)}
+
         saveViewState
       />
     </>

@@ -9,6 +9,7 @@ function ab2str(buf: ArrayBuffer): string {
   return String.fromCharCode.apply(null, new Uint8Array(buf));
 }
 export const XTerminal = ({ socket }: { socket: Socket }) => {
+
   const terminalRef = useRef<HTMLDivElement>(null);
   const XtermRef = useRef<Terminal>(null)
 

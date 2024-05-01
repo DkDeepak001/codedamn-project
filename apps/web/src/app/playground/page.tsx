@@ -9,9 +9,9 @@ import _ from 'lodash';
 import { Output } from "@/components/output";
 import dynamic from "next/dynamic";
 import { useSearchParams } from "next/navigation";
-import { Projects } from "@repo/database";
 import { ClipLoader } from "react-spinners";
 import { useAuth } from "@clerk/nextjs";
+import { useProject } from "@/hooks/useProject";
 
 const DynamicTerminalComponent = dynamic(() => import('@/components/terminal').then(m => m.XTerminal), {
   ssr: false
@@ -22,27 +22,14 @@ export type SelectedFileType = Omit<FileTreeType, 'children' | 'expanded'>
 
 export default function Playground() {
   const projectId = useSearchParams().get('projectId')
+
   const { userId } = useAuth()
-  const [project, setProject] = useState<Projects>()
-  const [loading, setLoading] = useState(true)
-  useEffect(() => {
-    if (!projectId) return
-
-    const fetchUrl = async () => {
-      const res = await fetch(`api/projects?projectId=${projectId}`, { method: "GET" })
-      const data = await res.json() as { projects: Projects }
-      setProject(data.projects)
-    }
-    fetchUrl()
-  }, [projectId])
-
-
-  const socket = useSocket({
-    wsUrl: project?.terminalUrl!,
-    containerId: `${userId}-${project?.title}`,
-    projectId: project?.id!
-  })
+  const project = useProject({ projectId: projectId as string })
+  const socket = useSocket({ wsUrl: project?.terminalUrl!, containerId: `${userId}-${project?.title}`, projectId: project?.id! })
   console.log(socket)
+
+
+  const [loading, setLoading] = useState(true)
   const [selectedFile, setSelectedFile] = useState<SelectedFileType>()
   const [serverFiles, setServerFiles] = useState<FileTreeType>()
   const [recentFiles, setRecentFiles] = useState<SelectedFileType[]>([])
@@ -127,14 +114,14 @@ export default function Playground() {
               />
             </ResizablePanel>
             <ResizableHandle withHandle />
-            <ResizablePanel defaultSize={25} maxSize={42} minSize={25} className="p-2" >
+            <ResizablePanel defaultSize={22} maxSize={42} minSize={22} className="p-2" >
               <DynamicTerminalComponent socket={socket} />
             </ResizablePanel>
           </ResizablePanelGroup>
         </ResizablePanel>
         <ResizableHandle withHandle />
         <ResizablePanel defaultSize={35}>
-          <Output url={project?.outputUrl!} />
+          <Output url={project?.outputUrl! ?? "http://localhost:4000"} />
         </ResizablePanel>
       </ResizablePanelGroup>
     </div>

@@ -27,7 +27,6 @@ export const RecentPlayGround = (p: RecentPlayGroundProps) => {
       const data = await res.json()
       router.push(`playground?projectId=${data.project.id}`)
       setLoading(false)
-      setLoading(false)
     } catch (error) {
       console.log(error)
 
